@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useReveal } from '../hooks/useReveal'
 import { Check, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
+import emailjs from '@emailjs/browser'
 
-
-const API_URL = 'tik-tok'
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
 
 const validators = {
   fullName: (v) => {
@@ -138,36 +140,28 @@ export default function EarlyAccess() {
     setApiError(null)
 
     try {
-      const payload = {
+      const templateParams = {
         role,
         fullName: form.fullName.trim(),
         email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
-        ...(role === 'provider' && {
-          clinicName: form.clinicName.trim(),
-          specialty: form.specialty,
-        }),
-        ...(form.city.trim() && { city: form.city.trim() }),
-        ...(form.source && { source: form.source }),
+        clinicName: role === 'provider' ? form.clinicName.trim() : 'N/A',
+        specialty: role === 'provider' ? form.specialty : 'N/A',
+        city: form.city.trim() || 'Not provided',
+        source: form.source || 'Not provided',
       }
 
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.message || `Server error: ${res.status}`)
-      }
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      )
 
       setSubmitted(true)
     } catch (err) {
       setApiError(
-        err.message === 'Failed to fetch'
-          ? 'Could not reach the server. Please check your connection and try again.'
-          : err.message
+        err.text || 'Something went wrong. Please try again later.'
       )
     } finally {
       setLoading(false)
