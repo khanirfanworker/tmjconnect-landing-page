@@ -121,7 +121,7 @@ export default function SymptomLogging() {
               <div className="text-white/50 text-xs">Every entry is structured, timestamped, and visible to your provider instantly.</div>
             </div>
           </div>
-          <a href="#how-it-works" className="btn-secondary border-white/20 text-white hover:bg-white/10 shrink-0">
+          <a href="#how-it-works" className="btn-primary shadow-2xl border-white/20 text-white hover:bg-white/10 shrink-0">
             See what your provider sees
           </a>
         </div>
